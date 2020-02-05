@@ -40,7 +40,7 @@ pub(crate) fn features() -> Features {
         let () = INIT.call_once(|| {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             {
-                extern "C" {
+                versioned_extern! {
                     fn GFp_cpuid_setup();
                 }
                 unsafe {
@@ -228,7 +228,7 @@ pub(crate) mod arm {
         any(target_os = "android", target_os = "linux", target_os = "fuchsia"),
         any(target_arch = "arm", target_arch = "aarch64")
     ))]
-    extern "C" {
+    versioned_extern! {
         static mut GFp_armcap_P: u32;
     }
 }
@@ -248,7 +248,7 @@ pub(crate) mod intel {
         pub fn available(&self, _: super::Features) -> bool {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             {
-                extern "C" {
+                versioned_extern! {
                     static mut GFp_ia32cap_P: [u32; 4];
                 }
                 return self.mask == self.mask & unsafe { GFp_ia32cap_P[self.word] };
