@@ -265,7 +265,7 @@ impl<M> Modulus<M> {
         // n_mod_r = n % r. As explained in the documentation for `n0`, this is
         // done by taking the lowest `N0_LIMBS_USED` limbs of `n`.
         let n0 = {
-            extern "C" {
+            versioned_extern! {
                 fn GFp_bn_neg_inv_mod_r_u64(n: u64) -> u64;
             }
 
@@ -482,7 +482,7 @@ where
 }
 
 fn elem_mul_by_2<M, AF>(a: &mut Elem<M, AF>, m: &PartialModulus<M>) {
-    extern "C" {
+    versioned_extern! {
         fn LIMBS_shl_mod(r: *mut Limb, a: *const Limb, m: *const Limb, num_limbs: c::size_t);
     }
     unsafe {
@@ -516,7 +516,7 @@ pub fn elem_reduced<Larger, Smaller: NotMuchSmallerModulus<Larger>>(
     a: &Elem<Larger, Unencoded>,
     m: &Modulus<Smaller>,
 ) -> Result<Elem<Smaller, RInverse>, error::Unspecified> {
-    extern "C" {
+    versioned_extern! {
         fn GFp_bn_from_montgomery_in_place(
             r: *mut Limb,
             num_r: c::size_t,
@@ -572,7 +572,7 @@ pub fn elem_widen<Larger, Smaller: SmallerModulus<Larger>>(
 
 // TODO: Document why this works for all Montgomery factors.
 pub fn elem_add<M, E>(mut a: Elem<M, E>, b: Elem<M, E>, m: &Modulus<M>) -> Elem<M, E> {
-    extern "C" {
+    versioned_extern! {
         // `r` and `a` may alias.
         fn LIMBS_add_mod(
             r: *mut Limb,
@@ -596,7 +596,7 @@ pub fn elem_add<M, E>(mut a: Elem<M, E>, b: Elem<M, E>, m: &Modulus<M>) -> Elem<
 
 // TODO: Document why this works for all Montgomery factors.
 pub fn elem_sub<M, E>(mut a: Elem<M, E>, b: &Elem<M, E>, m: &Modulus<M>) -> Elem<M, E> {
-    extern "C" {
+    versioned_extern! {
         // `r` and `a` may alias.
         fn LIMBS_sub_mod(
             r: *mut Limb,
@@ -845,7 +845,7 @@ pub fn elem_exp_consttime<M>(
     let mut table = vec![0; TABLE_ENTRIES * num_limbs];
 
     fn gather<M>(table: &[Limb], i: Window, r: &mut Elem<M, R>) {
-        extern "C" {
+        versioned_extern! {
             fn LIMBS_select_512_32(
                 r: *mut Limb,
                 table: *const Limb,
@@ -972,7 +972,7 @@ pub fn elem_exp_consttime<M>(
     entry_mut(state, M, num_limbs).copy_from_slice(&m.limbs);
 
     fn scatter(table: &mut [Limb], state: &[Limb], i: Window, num_limbs: usize) {
-        extern "C" {
+        versioned_extern! {
             fn GFp_bn_scatter5(a: *const Limb, a_len: c::size_t, table: *mut Limb, i: Window);
         }
         unsafe {
@@ -986,7 +986,7 @@ pub fn elem_exp_consttime<M>(
     }
 
     fn gather(table: &[Limb], state: &mut [Limb], i: Window, num_limbs: usize) {
-        extern "C" {
+        versioned_extern! {
             fn GFp_bn_gather5(r: *mut Limb, a_len: c::size_t, table: *const Limb, i: Window);
         }
         unsafe {
@@ -1008,7 +1008,7 @@ pub fn elem_exp_consttime<M>(
     }
 
     fn gather_mul_base(table: &[Limb], state: &mut [Limb], n0: &N0, i: Window, num_limbs: usize) {
-        extern "C" {
+        versioned_extern! {
             fn GFp_bn_mul_mont_gather5(
                 rp: *mut Limb,
                 ap: *const Limb,
@@ -1033,7 +1033,7 @@ pub fn elem_exp_consttime<M>(
     }
 
     fn power(table: &[Limb], state: &mut [Limb], n0: &N0, i: Window, num_limbs: usize) {
-        extern "C" {
+        versioned_extern! {
             fn GFp_bn_power5(
                 r: *mut Limb,
                 a: *const Limb,
@@ -1091,7 +1091,7 @@ pub fn elem_exp_consttime<M>(
         },
     );
 
-    extern "C" {
+    versioned_extern! {
         fn GFp_bn_from_montgomery(
             r: *mut Limb,
             a: *const Limb,
@@ -1274,7 +1274,7 @@ fn limbs_mont_square(r: &mut [Limb], m: &[Limb], n0: &N0) {
     }
 }
 
-extern "C" {
+versioned_extern! {
     // `r` and/or 'a' and/or 'b' may alias.
     fn GFp_bn_mul_mont(
         r: *mut Limb,

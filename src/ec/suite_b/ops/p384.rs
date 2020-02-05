@@ -338,7 +338,7 @@ const N_RR_LIMBS: [Limb; MAX_LIMBS] = p384_limbs![
     0x28266895, 0x3fb05b7a, 0x2b39bf21, 0x0c84ee01
 ];
 
-extern "C" {
+versioned_extern! {
     fn GFp_p384_elem_add(
         r: *mut Limb,   // [COMMON_OPS.num_limbs]
         a: *const Limb, // [COMMON_OPS.num_limbs]
